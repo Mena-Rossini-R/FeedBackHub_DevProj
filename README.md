@@ -7,3 +7,10 @@ Frontend hosted in netlify
 DB hosted in aiven
 Backend hosted in render
  
+
+
+To run local:   
+set up sql as create db feedbackhub, then run the backend in intelij, frontend - npm install, npm start
+
+
+
