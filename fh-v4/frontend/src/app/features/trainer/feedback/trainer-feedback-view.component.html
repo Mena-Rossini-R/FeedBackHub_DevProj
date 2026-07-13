@@ -1,0 +1,103 @@
+<div class="tf-wrapper">
+  <div class="tf-header">
+    <h2>Student Feedback</h2>
+    <p>Click a student to view their assignment conversations</p>
+  </div>
+
+  <div class="tf-body">
+
+    <!-- LEFT: Student list -->
+    <div class="student-list">
+      <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+      <div *ngIf="!loading && students.length === 0" class="empty-state">
+        <mat-icon>people_outline</mat-icon><p>No student feedback yet</p>
+      </div>
+      <div class="student-card"
+           *ngFor="let s of students"
+           [class.selected]="selectedStudent?.email === s.email"
+           [class.has-unread]="s.totalUnread > 0"
+           (click)="selectStudent(s)">
+        <div class="sc-avatar">{{ s.name[0] }}</div>
+        <div class="sc-info">
+          <div class="sc-name">{{ s.name }}</div>
+          <div class="sc-sub">{{ s.scores.length }} assignment{{ s.scores.length !== 1 ? 's' : '' }}</div>
+        </div>
+        <span class="unread-badge" *ngIf="s.totalUnread > 0">{{ s.totalUnread }}</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: Chat area -->
+    <div class="chat-area">
+
+      <!-- No student selected -->
+      <div *ngIf="!selectedStudent" class="empty-state centered">
+        <mat-icon>chat_bubble_outline</mat-icon>
+        <p>Select a student from the left</p>
+      </div>
+
+      <ng-container *ngIf="selectedStudent">
+        <!-- Assignment tabs -->
+        <div class="assignment-tabs">
+          <button class="asgn-tab"
+                  *ngFor="let sc of selectedStudent.scores"
+                  [class.active]="selectedScore?.id === sc.id"
+                  (click)="selectScore(sc)">
+            <span class="asgn-tab-name">{{ sc.assignmentName }}</span>
+            <span class="asgn-tab-score">{{ sc.score }}%</span>
+            <span class="tab-dot" *ngIf="hasUnread(sc.id)"></span>
+          </button>
+        </div>
+
+        <!-- No assignment selected -->
+        <div *ngIf="!selectedScore" class="empty-state centered">
+          <mat-icon>touch_app</mat-icon>
+          <p>Select an assignment above to open the chat</p>
+        </div>
+
+        <!-- Chat messages -->
+        <ng-container *ngIf="selectedScore">
+          <div class="chat-header">
+            <div class="ch-avatar">{{ selectedStudent.name[0] }}</div>
+            <div>
+              <div class="ch-name">{{ selectedStudent.name }}</div>
+              <div class="ch-sub">{{ selectedScore.assignmentName }} · {{ selectedScore.score }}%</div>
+            </div>
+          </div>
+
+          <div class="messages">
+            <app-loading-spinner *ngIf="loadingMessages"></app-loading-spinner>
+            <ng-container *ngIf="!loadingMessages">
+              <div class="empty-state" *ngIf="messages.length === 0">
+                <mat-icon>chat_bubble_outline</mat-icon><p>No messages yet — start the conversation!</p>
+              </div>
+              <div class="message"
+                   *ngFor="let m of messages"
+                   [class.trainer-msg]="isTrainer(m.senderRole)"
+                   [class.trainee-msg]="!isTrainer(m.senderRole)">
+                <div class="msg-meta">
+                  <span class="msg-sender">{{ m.senderName }}</span>
+                  <span class="new-chip" *ngIf="!isTrainer(m.senderRole) && !m.readByTrainer">NEW</span>
+                  <span class="msg-time">{{ m.createdAt | date:'short' }}</span>
+                </div>
+                <div class="msg-bubble">{{ m.message }}</div>
+              </div>
+            </ng-container>
+          </div>
+
+          <div class="reply-bar">
+            <mat-form-field appearance="outline" style="flex:1">
+              <mat-label>Reply to {{ selectedStudent.name }}...</mat-label>
+              <textarea matInput [formControl]="messageCtrl" rows="2" (keydown.control.enter)="sendReply()"></textarea>
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="sendReply()" [disabled]="sending || messageCtrl.invalid">
+              <mat-spinner diameter="16" *ngIf="sending"></mat-spinner>
+              <mat-icon *ngIf="!sending">send</mat-icon>
+              Send
+            </button>
+          </div>
+        </ng-container>
+      </ng-container>
+
+    </div>
+  </div>
+</div>

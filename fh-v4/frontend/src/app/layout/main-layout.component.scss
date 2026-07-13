@@ -1,0 +1,57 @@
+// layout/main-layout.component.scss
+.app-container { height: 100vh; }
+
+.sidenav {
+  width: 236px; background: #0E1630; color: #fff; display: flex; flex-direction: column;
+  .sidenav-header { padding: 18px 14px 12px;
+    .logo-row { display:flex; align-items:center; gap:8px; margin-bottom:10px;
+      .logo-box { background:#2A70B2; color:#FFD700; font-weight:800; padding:4px 8px; border-radius:6px; font-size:12px; }
+      .logo-text { font-size:16px; font-weight:600; }
+    }
+    .role-chip { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-weight:600; text-transform:uppercase;
+      &.trainer { background:#2A70B2; } &.trainee { background:#12987A; }
+    }
+  }
+  mat-nav-list {
+    flex:1; padding-top:8px;
+    a { color:#C8D8EC; border-radius:0 22px 22px 0; margin-right:10px;
+      &.active-link { background:#2A70B2; color:#fff; mat-icon { color:#fff; } }
+      &:hover:not(.active-link) { background:rgba(255,255,255,.07); color:#fff; }
+      mat-icon { color:#C8D8EC; }
+    }
+    ::ng-deep .mdc-list-item__primary-text {
+      display: flex !important; align-items: center; width: 100%; overflow: visible;
+    }
+  }
+  .sidenav-footer { padding:0 0 8px;
+    .user-row { display:flex; align-items:center; gap:10px; padding:12px 14px;
+      .user-avatar { width:32px; height:32px; border-radius:50%; background:#2A70B2; color:#fff;
+        display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }
+      .user-name  { font-size:13px; font-weight:600; }
+      .user-email { font-size:11px; color:#8AA4C4; }
+    }
+    .logout-btn { width:100%; color:#8AA4C4; justify-content:flex-start; padding-left:14px; }
+  }
+}
+
+.top-bar {
+  background:#16243C !important; position:sticky; top:0; z-index:100;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
+  .toolbar-avatar { width:30px; height:30px; border-radius:50%; background:#2A70B2;
+    color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; }
+}
+
+.main-content { background:#F2F4F8; }
+.page-content  { padding:24px; min-height:calc(100vh - 64px); }
+
+.nav-label-row {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+}
+
+.nav-unread-dot {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #DC2626; color: #fff;
+  font-size: 10px; font-weight: 700;
+  min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px;
+  margin-left: auto;
+}

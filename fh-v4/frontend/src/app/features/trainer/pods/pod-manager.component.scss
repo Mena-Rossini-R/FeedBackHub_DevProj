@@ -1,0 +1,124 @@
+// ── Page layout ──────────────────────────────────────────────────────────
+.page-wrapper  { max-width:1200px;width:100%;margin:0 auto; }
+.page-header   { margin-bottom:20px; }
+.page-subtitle { font-size:13px;color:#64748B;margin-top:4px; }
+.breadcrumb {
+  display:flex;align-items:center;gap:6px;margin-bottom:4px;
+  .bc-link { display:flex;align-items:center;gap:4px;font-size:14px;color:#2A70B2;cursor:pointer;font-weight:700;
+             &:hover{text-decoration:underline;} mat-icon{font-size:18px;width:18px;height:18px;} }
+  .bc-current { font-size:18px;font-weight:800;color:#0E1630; }
+}
+
+// ── Pod grid ──────────────────────────────────────────────────────────────
+.pod-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px; }
+.pod-card {
+  display:flex;background:#fff;border-radius:14px;border:1px solid #E2E8F0;overflow:hidden;
+  cursor:pointer;transition:all .18s;
+  &:hover { box-shadow:0 6px 24px rgba(0,0,0,.12);transform:translateY(-3px); }
+}
+.pod-stripe { width:6px;flex-shrink:0; }
+.pod-body   { padding:18px;flex:1; }
+.pod-header-row {
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
+  .pod-name  { font-size:15px;font-weight:800;color:#0E1630; }
+  .pod-badge { padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700; }
+}
+.pod-avg-row {
+  display:flex;align-items:baseline;gap:8px;margin-bottom:6px;
+  .pod-avg       { font-size:34px;font-weight:800;line-height:1; }
+  .pod-avg-label { font-size:12px;color:#94A3B8; }
+}
+.pod-bar-track { background:#F1F5F9;border-radius:6px;height:5px;overflow:hidden;margin-bottom:14px; }
+.pod-bar-fill  { height:5px;border-radius:6px;transition:width .4s; }
+
+// ── Mini student list inside pod card ─────────────────────────────────────
+.sml-list      { display:flex;flex-direction:column;gap:5px;margin-bottom:10px; }
+.sml-item      { display:flex;align-items:center;gap:7px; }
+.sml-av        { width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+                 font-weight:800;font-size:9px;color:#fff;flex-shrink:0; }
+.sml-name      { font-size:11px;color:#475569;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.sml-bar-track { flex:1;background:#F1F5F9;border-radius:3px;height:4px;overflow:hidden; }
+.sml-bar-fill  { height:4px;border-radius:3px;transition:width .35s; }
+.sml-score     { font-size:11px;font-weight:700;min-width:30px;text-align:right; }
+.sml-more      { font-size:11px;color:#94A3B8;text-align:center; }
+.pod-footer {
+  display:flex;align-items:center;justify-content:space-between;
+  .at-risk { display:flex;align-items:center;gap:4px;font-size:11px;color:#DC2626;font-weight:700;
+             mat-icon{font-size:14px;width:14px;height:14px;} }
+  .see-all { display:flex;align-items:center;gap:4px;font-size:11px;color:#94A3B8;
+             mat-icon{font-size:14px;width:14px;height:14px;} }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────
+.empty-state {
+  text-align:center;padding:48px 24px;background:#fff;border:1px solid #E2E8F0;
+  border-radius:12px;grid-column:1/-1;
+  mat-icon { font-size:48px;color:#CBD5E1;display:block;margin:0 auto 8px;width:48px;height:48px; }
+  p { color:#94A3B8;margin-bottom:16px; }
+}
+
+// ── Summary bar (level 2) ─────────────────────────────────────────────────
+.summary-bar {
+  display:flex;align-items:center;background:#fff;border:1px solid #E2E8F0;
+  border-radius:12px;padding:16px 20px;margin-bottom:16px;flex-wrap:wrap;row-gap:8px;
+}
+.sb-item  { text-align:center;padding:0 20px; }
+.sb-val   { font-size:22px;font-weight:800;color:#0E1630;line-height:1.1; }
+.sb-label { font-size:11px;color:#94A3B8;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:2px; }
+.sb-div   { width:1px;background:#E2E8F0;height:36px;align-self:center; }
+
+// ── Student list (level 2) ────────────────────────────────────────────────
+.student-list { display:flex;flex-direction:column;gap:8px; }
+.student-row  {
+  display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #E2E8F0;
+  border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;
+  &:hover { border-color:#2A70B2;box-shadow:0 2px 8px rgba(42,112,178,.1); }
+}
+.sr-av { width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+         font-weight:800;font-size:13px;color:#fff;flex-shrink:0; }
+.sr-info {
+  flex:1;min-width:0;
+  .sr-name  { font-size:13px;font-weight:700;color:#0E1630; }
+  .sr-email { font-size:11px;color:#94A3B8; }
+}
+.sr-score-section { display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:80px; }
+.sr-score-val  { font-size:18px;font-weight:800; }
+.sr-bar-track  { width:80px;background:#F1F5F9;border-radius:4px;height:4px;overflow:hidden; }
+.sr-bar-fill   { height:4px;border-radius:4px;transition:width .35s; }
+.sr-trend      { font-size:18px;width:18px;height:18px; }
+.sr-meta       { font-size:11px;color:#94A3B8;min-width:90px;text-align:center; }
+
+// ── Student detail card (level 3) ─────────────────────────────────────────
+.student-detail-card {
+  background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:20px;
+}
+.sd-header {
+  display:flex;align-items:center;gap:14px;margin-bottom:20px;
+  .sd-av    { width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+              font-weight:800;font-size:18px;color:#fff;flex-shrink:0; }
+  .sd-info  { flex:1;min-width:0;
+    .sd-name  { font-size:16px;font-weight:800;color:#0E1630; }
+    .sd-email { font-size:12px;color:#94A3B8; }
+  }
+  .sd-score { font-size:32px;font-weight:800; }
+  .sd-trend { font-size:28px;width:28px;height:28px; }
+}
+
+// ── Category chips grid ───────────────────────────────────────────────────
+.cat-grid {
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px;
+}
+.cat-chip {
+  border:1.5px solid transparent;border-radius:10px;padding:12px 14px;
+  .cat-label     { font-size:11px;font-weight:600;color:#475569;margin-bottom:4px; }
+  .cat-val       { font-size:22px;font-weight:800;margin-bottom:6px; }
+  .cat-bar-track { background:rgba(0,0,0,.08);border-radius:4px;height:4px;overflow:hidden; }
+  .cat-bar-fill  { height:4px;border-radius:4px;transition:width .35s; }
+}
+
+// ── Weak category alert ───────────────────────────────────────────────────
+.weak-alert {
+  display:flex;align-items:center;gap:8px;background:#FEF2F2;border:1px solid #FECACA;
+  border-radius:10px;padding:12px 16px;font-size:13px;color:#DC2626;font-weight:600;
+  mat-icon { font-size:18px;width:18px;height:18px;flex-shrink:0; }
+}

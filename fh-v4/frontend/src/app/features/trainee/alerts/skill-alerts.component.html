@@ -1,0 +1,194 @@
+<div class="page-wrapper">
+
+  <!-- ── PAGE HEADER ─────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div>
+      <h2>Skill Alerts</h2>
+      <p>Your performance breakdown across all assessments</p>
+    </div>
+    <!-- Overall summary pills -->
+    <div class="summary-pills" *ngIf="!loading">
+      <div class="pill critical"><mat-icon>error</mat-icon>{{ criticalAlerts.length }} Critical</div>
+      <div class="pill warning"><mat-icon>warning</mat-icon>{{ warningAlerts.length }} Warning</div>
+      <div class="pill maintain"><mat-icon>check_circle</mat-icon>{{ maintainCats.length }} Maintaining</div>
+      <div class="pill total"><mat-icon>assignment</mat-icon>{{ scores.length }} Assessments</div>
+    </div>
+  </div>
+
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- ── OVERALL PROGRESS BAR ─────────────────────────────────────────── -->
+    <div class="overall-bar-card">
+      <div class="ob-left">
+        <span class="ob-label">Overall Average</span>
+        <span class="ob-score" [style.color]="getLevelColor(overallAvg >= 80 ? 'MAINTAIN' : overallAvg >= 60 ? 'WARNING' : 'CRITICAL')">
+          {{ overallAvg }}%
+        </span>
+      </div>
+      <div class="ob-track">
+        <div class="ob-fill"
+          [style.width.%]="overallAvg"
+          [style.background]="getLevelColor(overallAvg >= 80 ? 'MAINTAIN' : overallAvg >= 60 ? 'WARNING' : 'CRITICAL')">
+        </div>
+      </div>
+      <div class="ob-right">
+        <span class="ob-badge" [style.background]="getLevelBg(overallAvg >= 80 ? 'MAINTAIN' : overallAvg >= 60 ? 'WARNING' : 'CRITICAL')"
+          [style.color]="getLevelColor(overallAvg >= 80 ? 'MAINTAIN' : overallAvg >= 60 ? 'WARNING' : 'CRITICAL')">
+          {{ overallAvg >= 80 ? 'MAINTAIN' : overallAvg >= 60 ? 'WARNING' : 'CRITICAL' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- ── 3-COLUMN LAYOUT ─────────────────────────────────────────────── -->
+    <div class="three-col">
+
+      <!-- ── COLUMN 1: CRITICAL ──────────────────────────────────────────── -->
+      <div class="col col-critical">
+        <div class="col-header">
+          <mat-icon>error</mat-icon>
+          <span>Critical</span>
+          <span class="col-subtitle">Score &lt; 60%</span>
+          <span class="col-count">{{ criticalAlerts.length }}</span>
+        </div>
+
+        <!-- Category chips for critical topics -->
+        <div class="cat-section" *ngIf="criticalCats.length">
+          <div class="cat-title">Topics needing urgent attention</div>
+          <div class="cat-chip-list">
+            <div class="cat-chip critical" *ngFor="let c of criticalCats">
+              <span class="cc-name">{{ c.category }}</span>
+              <span class="cc-avg">{{ c.avg }}%</span>
+              <div class="cc-bar"><div class="cc-fill" [style.width.%]="c.avg"></div></div>
+              <span class="cc-count">{{ c.count }} assessment{{ c.count > 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active critical alerts -->
+        <div class="alert-list" *ngIf="criticalAlerts.length; else noCritical">
+          <div class="alert-card critical" *ngFor="let a of criticalAlerts">
+            <div class="ac-top">
+              <span class="ac-skill">{{ a.skillName }}</span>
+              <span class="ac-score">{{ a.scoreValue }}%</span>
+            </div>
+            <div class="ac-msg">{{ a.message }}</div>
+            <div class="ac-actions">
+              <button class="ac-btn ack" *ngIf="!a.acknowledged" (click)="acknowledge(a)">
+                <mat-icon>done</mat-icon> Acknowledge
+              </button>
+              <span class="ack-note" *ngIf="a.acknowledged">✓ Seen</span>
+              <button class="ac-btn res" (click)="resolve(a)">
+                <mat-icon>check_circle</mat-icon> Resolve
+              </button>
+            </div>
+          </div>
+        </div>
+        <ng-template #noCritical>
+          <div class="col-empty" *ngIf="!criticalCats.length">
+            <mat-icon>check_circle</mat-icon><span>No critical issues!</span>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- ── COLUMN 2: WARNING ───────────────────────────────────────────── -->
+      <div class="col col-warning">
+        <div class="col-header">
+          <mat-icon>warning</mat-icon>
+          <span>Warning</span>
+          <span class="col-subtitle">Score 60–79%</span>
+          <span class="col-count">{{ warningAlerts.length }}</span>
+        </div>
+
+        <div class="cat-section" *ngIf="warningCats.length">
+          <div class="cat-title">Topics needing improvement</div>
+          <div class="cat-chip-list">
+            <div class="cat-chip warning" *ngFor="let c of warningCats">
+              <span class="cc-name">{{ c.category }}</span>
+              <span class="cc-avg">{{ c.avg }}%</span>
+              <div class="cc-bar"><div class="cc-fill" [style.width.%]="c.avg"></div></div>
+              <span class="cc-count">{{ c.count }} assessment{{ c.count > 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert-list" *ngIf="warningAlerts.length; else noWarning">
+          <div class="alert-card warning" *ngFor="let a of warningAlerts">
+            <div class="ac-top">
+              <span class="ac-skill">{{ a.skillName }}</span>
+              <span class="ac-score">{{ a.scoreValue }}%</span>
+            </div>
+            <div class="ac-msg">{{ a.message }}</div>
+            <div class="ac-actions">
+              <button class="ac-btn ack" *ngIf="!a.acknowledged" (click)="acknowledge(a)">
+                <mat-icon>done</mat-icon> Acknowledge
+              </button>
+              <span class="ack-note" *ngIf="a.acknowledged">✓ Seen</span>
+              <button class="ac-btn res" (click)="resolve(a)">
+                <mat-icon>check_circle</mat-icon> Resolve
+              </button>
+            </div>
+          </div>
+        </div>
+        <ng-template #noWarning>
+          <div class="col-empty" *ngIf="!warningCats.length">
+            <mat-icon>check_circle</mat-icon><span>No warnings!</span>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- ── COLUMN 3: MAINTAIN ─────────────────────────────────────────── -->
+      <div class="col col-maintain">
+        <div class="col-header">
+          <mat-icon>trending_up</mat-icon>
+          <span>Maintaining</span>
+          <span class="col-subtitle">Score ≥ 80%</span>
+          <span class="col-count">{{ maintainCats.length }}</span>
+        </div>
+
+        <div class="cat-section" *ngIf="maintainCats.length">
+          <div class="cat-title">Topics performing well</div>
+          <div class="cat-chip-list">
+            <div class="cat-chip maintain" *ngFor="let c of maintainCats">
+              <span class="cc-name">{{ c.category }}</span>
+              <span class="cc-avg">{{ c.avg }}%</span>
+              <div class="cc-bar"><div class="cc-fill" [style.width.%]="c.avg"></div></div>
+              <span class="cc-count">{{ c.count }} assessment{{ c.count > 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert-list" *ngIf="maintainAlerts.length">
+          <div class="alert-card maintain" *ngFor="let a of maintainAlerts">
+            <div class="ac-top">
+              <span class="ac-skill">{{ a.skillName }}</span>
+              <span class="ac-score">{{ a.scoreValue }}%</span>
+            </div>
+            <div class="ac-msg">{{ a.message }}</div>
+          </div>
+        </div>
+
+        <div class="col-empty" *ngIf="!maintainCats.length && !maintainAlerts.length">
+          <mat-icon>emoji_events</mat-icon><span>Score above 80% to appear here!</span>
+        </div>
+      </div>
+
+    </div><!-- end .three-col -->
+
+    <!-- ── RESOLVED ALERTS (collapsed section) ─────────────────────────── -->
+    <div class="resolved-section" *ngIf="resolvedAlerts.length">
+      <div class="section-label">RESOLVED ALERTS ({{ resolvedAlerts.length }})</div>
+      <div class="resolved-list">
+        <div class="resolved-card" *ngFor="let a of resolvedAlerts">
+          <mat-icon>check_circle</mat-icon>
+          <span class="rv-skill">{{ a.skillName }}</span>
+          <span class="rv-score">{{ a.scoreValue }}%</span>
+          <span class="rv-badge" [style.background]="getLevelBg(a.alertLevel)" [style.color]="getLevelColor(a.alertLevel)">{{ a.alertLevel }}</span>
+          <span class="rv-note">Resolved</span>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

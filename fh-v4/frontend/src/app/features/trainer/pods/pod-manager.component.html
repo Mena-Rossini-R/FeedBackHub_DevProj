@@ -1,0 +1,146 @@
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="breadcrumb">
+      <span class="bc-link" (click)="back()" *ngIf="selectedPod || selectedStudent">
+        <mat-icon>arrow_back</mat-icon>
+        {{ selectedStudent ? selectedPod?.name : 'All Pods' }}
+      </span>
+      <mat-icon *ngIf="selectedPod" style="color:#CBD5E1;font-size:16px;width:16px">chevron_right</mat-icon>
+      <span class="bc-current">
+        {{ selectedStudent ? selectedStudent.name : selectedPod ? selectedPod.name : 'Pod Manager' }}
+      </span>
+    </div>
+    <p class="page-subtitle">
+      {{ selectedStudent ? (selectedStudent.count + ' assessments')
+       : selectedPod ? (selectedPod.students.length + ' students in this pod')
+       : (pods.length + ' pods across your cohorts') }}
+    </p>
+  </div>
+
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+
+  <!-- ════ Pod Cards ════ -->
+  <div *ngIf="!loading && !selectedPod && !selectedStudent">
+    <div class="pod-grid">
+      <div class="pod-card" *ngFor="let pod of pods" (click)="selectPod(pod)">
+        <div class="pod-stripe" [style.background]="pod.color"></div>
+        <div class="pod-body">
+          <div class="pod-header-row">
+            <span class="pod-name">{{ pod.name }}</span>
+            <span class="pod-badge" [style.background]="pod.color+'22'" [style.color]="pod.color">{{ pod.status }}</span>
+          </div>
+          <div class="pod-avg-row">
+            <div class="pod-avg" [style.color]="getScoreColor(pod.avg)">{{ pod.avg > 0 ? (pod.avg + '%') : '—' }}</div>
+            <div class="pod-avg-label">Avg · {{ pod.count }} students</div>
+          </div>
+          <div class="pod-bar-track">
+            <div class="pod-bar-fill" [style.width.%]="pod.avg" [style.background]="getScoreColor(pod.avg)"></div>
+          </div>
+          <div class="sml-list">
+            <div class="sml-item" *ngFor="let s of pod.students | slice:0:5">
+              <div class="sml-av" [style.background]="getScoreColor(s.avg)">{{ initials(s.name) }}</div>
+              <div class="sml-name">{{ firstName(s.name) }}</div>
+              <div class="sml-bar-track">
+                <div class="sml-bar-fill" [style.width.%]="s.avg" [style.background]="getScoreColor(s.avg)"></div>
+              </div>
+              <div class="sml-score" [style.color]="getScoreColor(s.avg)">{{ s.avg }}%</div>
+            </div>
+            <div class="sml-more" *ngIf="pod.students.length > 5">+{{ pod.students.length - 5 }} more</div>
+          </div>
+          <div class="pod-footer">
+            <span class="at-risk" *ngIf="getAtRiskCount(pod) > 0">
+              <mat-icon>warning</mat-icon> {{ getAtRiskCount(pod) }} at risk
+            </span>
+            <span class="see-all"><mat-icon>arrow_forward</mat-icon> View students</span>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!pods.length">
+        <mat-icon>workspaces</mat-icon>
+        <p>No pods found. Upload scores to see pods here.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ Students in Pod ════ -->
+  <div *ngIf="!loading && selectedPod && !selectedStudent">
+    <div class="summary-bar">
+      <div class="sb-item">
+        <div class="sb-val" [style.color]="getScoreColor(selectedPod.avg)">{{ selectedPod.avg > 0 ? (selectedPod.avg + '%') : '—' }}</div>
+        <div class="sb-label">Pod Average</div>
+      </div>
+      <div class="sb-div"></div>
+      <div class="sb-item">
+        <div class="sb-val">{{ selectedPod.count }}</div>
+        <div class="sb-label">Students</div>
+      </div>
+      <div class="sb-div"></div>
+      <div class="sb-item">
+        <div class="sb-val" style="color:#059669">{{ getTopScore(selectedPod) > 0 ? (getTopScore(selectedPod) + '%') : '—' }}</div>
+        <div class="sb-label">Top Score</div>
+      </div>
+      <div class="sb-div"></div>
+      <div class="sb-item">
+        <div class="sb-val" style="color:#DC2626">{{ getAtRiskCount(selectedPod) }}</div>
+        <div class="sb-label">At Risk (&lt;65%)</div>
+      </div>
+    </div>
+
+    <div class="student-list">
+      <div class="student-row" *ngFor="let s of selectedPod.students" (click)="selectStudent(s)">
+        <div class="sr-av" [style.background]="getScoreColor(s.avg)">{{ initials(s.name) }}</div>
+        <div class="sr-info">
+          <div class="sr-name">{{ s.name }}</div>
+          <div class="sr-email">{{ s.email }}</div>
+        </div>
+        <div class="sr-score-section">
+          <div class="sr-score-val" [style.color]="getScoreColor(s.avg)">{{ s.avg }}%</div>
+          <div class="sr-bar-track">
+            <div class="sr-bar-fill" [style.width.%]="s.avg" [style.background]="getScoreColor(s.avg)"></div>
+          </div>
+          <mat-icon class="sr-trend" [style.color]="getTrendColor(s.trend)">{{ getTrendIcon(s.trend) }}</mat-icon>
+        </div>
+        <div class="sr-meta">{{ s.count }} assessments</div>
+      </div>
+      <div class="empty-state" *ngIf="!selectedPod.students.length">
+        <mat-icon>person_off</mat-icon>
+        <p>No students yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ Student Detail ════ -->
+  <div *ngIf="!loading && selectedStudent">
+    <div class="student-detail-card">
+      <div class="sd-header">
+        <div class="sd-av" [style.background]="getScoreColor(selectedStudent.avg)">{{ initials(selectedStudent.name) }}</div>
+        <div class="sd-info">
+          <div class="sd-name">{{ selectedStudent.name }}</div>
+          <div class="sd-email">{{ selectedStudent.email }}</div>
+        </div>
+        <div class="sd-score" [style.color]="getScoreColor(selectedStudent.avg)">{{ selectedStudent.avg }}%</div>
+        <mat-icon class="sd-trend" [style.color]="getTrendColor(selectedStudent.trend)">{{ getTrendIcon(selectedStudent.trend) }}</mat-icon>
+      </div>
+
+      <div class="cat-grid" *ngIf="catEntries(selectedStudent.catAvgs).length">
+        <div class="cat-chip" *ngFor="let c of catEntries(selectedStudent.catAvgs)"
+             [style.background]="catBg(c.value)" [style.border-color]="catColor(c.value)">
+          <div class="cat-label">{{ c.key }}</div>
+          <div class="cat-val" [style.color]="catColor(c.value)">{{ c.value }}%</div>
+          <div class="cat-bar-track">
+            <div class="cat-bar-fill" [style.width.%]="c.value" [style.background]="catColor(c.value)"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="weak-alert" *ngIf="weakCategories.length">
+        <mat-icon>warning</mat-icon>
+        Needs focus: <strong>{{ weakCategories.join(', ') }}</strong>
+      </div>
+    </div>
+  </div>
+
+</div>
+

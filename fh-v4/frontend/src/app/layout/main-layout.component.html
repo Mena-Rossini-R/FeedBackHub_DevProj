@@ -1,0 +1,47 @@
+<!-- layout/main-layout.component.html -->
+<mat-sidenav-container class="app-container">
+  <mat-sidenav [opened]="sidebarOpen" mode="side" class="sidenav">
+    <div class="sidenav-header">
+      <div class="logo-row">
+        <span class="logo-box">FH</span>
+        <span class="logo-text">Feedback Hub</span>
+      </div>
+      <span class="role-chip" [class.trainer]="auth.isTrainer()" [class.trainee]="auth.isTrainee()">
+        {{ currentUser?.role }}
+      </span>
+    </div>
+    <mat-divider></mat-divider>
+    <mat-nav-list>
+      <a mat-list-item *ngFor="let l of navLinks" [routerLink]="l.path" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>{{ l.icon }}</mat-icon>
+        <span matListItemTitle class="nav-label-row">
+          {{ l.label }}
+          <span class="nav-unread-dot" *ngIf="l.feedbackBadge && feedbackUnreadCount > 0">{{ feedbackUnreadCount }}</span>
+        </span>
+      </a>
+    </mat-nav-list>
+    <div class="sidenav-footer">
+      <mat-divider></mat-divider>
+      <div class="user-row">
+        <div class="user-avatar">{{ currentUser?.fullName?.[0] }}</div>
+        <div>
+          <div class="user-name">{{ currentUser?.fullName }}</div>
+          <div class="user-email">{{ currentUser?.email }}</div>
+        </div>
+      </div>
+      <button mat-button class="logout-btn" (click)="logout()">
+        <mat-icon>logout</mat-icon> Logout
+      </button>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="main-content">
+    <mat-toolbar class="top-bar" color="primary">
+      <button mat-icon-button (click)="toggle()"><mat-icon>menu</mat-icon></button>
+      <span style="font-size:16px;font-weight:600">Feedback Hub</span>
+      <span style="flex:1"></span>
+      <div class="toolbar-avatar">{{ currentUser?.fullName?.[0] }}</div>
+    </mat-toolbar>
+    <div class="page-content"><router-outlet></router-outlet></div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

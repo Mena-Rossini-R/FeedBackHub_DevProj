@@ -1,0 +1,162 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div><h2>Bulk Upload</h2><p>Import scores or create a new cohort/pod from Excel</p></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="upload-tabs">
+    <button class="tab-btn" [class.active]="activeTab==='scores'" (click)="activeTab='scores'">
+      <mat-icon>upload_file</mat-icon> Score Upload
+    </button>
+    <button class="tab-btn" [class.active]="activeTab==='cohort'" (click)="activeTab='cohort'">
+      <mat-icon>group_add</mat-icon> Cohort / Pod Upload
+    </button>
+  </div>
+
+  <!-- ── SCORE UPLOAD TAB ─────────────────────────────────────────────── -->
+  <div *ngIf="activeTab==='scores'">
+
+    <!-- Format guide -->
+    <div class="format-guide">
+      <div class="fg-header"><mat-icon>help_outline</mat-icon> Required Excel Format</div>
+      <table class="fg-table">
+        <thead><tr><th>Column</th><th>Header</th><th>Description</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let f of scoreFormat">
+            <td class="col-letter">{{ f.col }}</td>
+            <td><code>{{ f.header }}</code></td>
+            <td>{{ f.desc }}</td>
+            <td class="col-example">{{ f.example }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="fg-note">
+        <mat-icon>info</mat-icon>
+        Row 1 should be the header row. Columns are auto-detected by header name.
+        Email must match an existing trainee account. Score must be 0–100.
+      <button mat-stroked-button color="primary" (click)="downloadScoreTemplate()" style="margin-top:8px">
+  <mat-icon>download</mat-icon> Download Score Template
+</button>
+      </div>
+    </div>
+
+    <!-- Drop zone -->
+    <div class="drop-zone" [class.drag-over]="scoreDragOver" [class.has-file]="scoreFile"
+         (dragover)="onScoreDragOver($event)" (dragleave)="onScoreDragLeave()" (drop)="onScoreDrop($event)">
+      <mat-icon class="drop-icon">cloud_upload</mat-icon>
+      <div class="drop-title" *ngIf="!scoreFile">Drag & drop Excel file here</div>
+      <div class="drop-title has-file" *ngIf="scoreFile">
+        <mat-icon>insert_drive_file</mat-icon> {{ scoreFile.name }} ({{ formatSize(scoreFile.size) }})
+      </div>
+      <p class="drop-sub">Supported: .xlsx  .xls  |  Max: 10 MB</p>
+      <label class="browse-btn">
+        <mat-icon>folder_open</mat-icon> Browse File
+        <input type="file" hidden accept=".xlsx,.xls" (change)="onScoreFileSelect($event)">
+      </label>
+    </div>
+
+    <div class="upload-actions" *ngIf="scoreFile">
+      <mat-progress-bar mode="indeterminate" *ngIf="scoreUploading" style="margin-bottom:12px"></mat-progress-bar>
+      <div class="action-btns">
+        <button mat-stroked-button (click)="scoreFile=null; scoreResult=null" [disabled]="scoreUploading">Clear</button>
+        <button mat-raised-button color="primary" (click)="uploadScores()" [disabled]="scoreUploading">
+          <mat-icon *ngIf="!scoreUploading">upload</mat-icon>
+          {{ scoreUploading ? 'Uploading...' : 'Import Scores' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-card" *ngIf="scoreResult">
+      <div class="result-summary">
+        <div class="rs-item green"><mat-icon>check_circle</mat-icon><span>{{ scoreResult.successCount }} imported</span></div>
+        <div class="rs-item red"   *ngIf="scoreResult.errorCount"><mat-icon>error</mat-icon><span>{{ scoreResult.errorCount }} errors</span></div>
+      </div>
+      <div class="error-list" *ngIf="scoreResult.errors?.length">
+        <div class="err-row" *ngFor="let e of scoreResult.errors"><mat-icon>warning</mat-icon>{{ e }}</div>
+      </div>
+      <table mat-table [dataSource]="scoreResult.uploaded" class="full-table" *ngIf="scoreResult.uploaded?.length">
+        <ng-container matColumnDef="traineeName"><th mat-header-cell *matHeaderCellDef>Student</th><td mat-cell *matCellDef="let r"><strong>{{ r.traineeName }}</strong></td></ng-container>
+        <ng-container matColumnDef="assignmentName"><th mat-header-cell *matHeaderCellDef>Assignment</th><td mat-cell *matCellDef="let r">{{ r.assignmentName }}</td></ng-container>
+        <ng-container matColumnDef="category"><th mat-header-cell *matHeaderCellDef>Category</th><td mat-cell *matCellDef="let r">{{ r.category }}</td></ng-container>
+        <ng-container matColumnDef="score"><th mat-header-cell *matHeaderCellDef>Score</th><td mat-cell *matCellDef="let r"><span [ngClass]="getScoreClass(r.score)">{{ r.score }}%</span></td></ng-container>
+        <ng-container matColumnDef="grade"><th mat-header-cell *matHeaderCellDef>Grade</th><td mat-cell *matCellDef="let r">{{ r.grade || '—' }}</td></ng-container>
+        <ng-container matColumnDef="weekLabel"><th mat-header-cell *matHeaderCellDef>Week</th><td mat-cell *matCellDef="let r">{{ r.weekLabel || '—' }}</td></ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedCols"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedCols"></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── COHORT UPLOAD TAB ────────────────────────────────────────────── -->
+  <div *ngIf="activeTab==='cohort'">
+
+    <div class="format-guide">
+      <div class="fg-header"><mat-icon>help_outline</mat-icon> Required Excel Format — Cohort/Pod Upload</div>
+      <table class="fg-table">
+        <thead><tr><th>Column</th><th>Header</th><th>Description</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let f of cohortFormat">
+            <td class="col-letter">{{ f.col }}</td>
+            <td><code>{{ f.header }}</code></td>
+            <td>{{ f.desc }}</td>
+            <td class="col-example">{{ f.example }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="fg-note">
+        <mat-icon>info</mat-icon>
+        New students get a default password of <strong>password</strong> — ask them to change it on first login.
+        If the email already exists, the student's cohort/pod will be updated.
+      <button mat-stroked-button color="primary" (click)="downloadCohortTemplate()" style="margin-top:8px">
+  <mat-icon>download</mat-icon> Download Cohort Template
+</button>
+      </div>
+    </div>
+
+    <div class="drop-zone cohort-zone" [class.drag-over]="cohortDragOver" [class.has-file]="cohortFile"
+         (dragover)="onCohortDragOver($event)" (dragleave)="onCohortDragLeave()" (drop)="onCohortDrop($event)">
+      <mat-icon class="drop-icon" style="color:#0D9488">group_add</mat-icon>
+      <div class="drop-title" *ngIf="!cohortFile">Drag & drop student list here</div>
+      <div class="drop-title has-file" *ngIf="cohortFile">
+        <mat-icon>insert_drive_file</mat-icon> {{ cohortFile.name }} ({{ formatSize(cohortFile.size) }})
+      </div>
+      <p class="drop-sub">Creates trainee accounts + assigns to cohort/pod</p>
+      <label class="browse-btn cohort-btn">
+        <mat-icon>folder_open</mat-icon> Browse File
+        <input type="file" hidden accept=".xlsx,.xls" (change)="onCohortFileSelect($event)">
+      </label>
+    </div>
+
+    <div class="upload-actions" *ngIf="cohortFile">
+      <mat-progress-bar mode="indeterminate" *ngIf="cohortUploading" style="margin-bottom:12px"></mat-progress-bar>
+      <div class="action-btns">
+        <button mat-stroked-button (click)="cohortFile=null; cohortResult=null" [disabled]="cohortUploading">Clear</button>
+        <button mat-raised-button style="background:#0D9488;color:#fff" (click)="uploadCohort()" [disabled]="cohortUploading">
+          <mat-icon *ngIf="!cohortUploading">group_add</mat-icon>
+          {{ cohortUploading ? 'Creating...' : 'Create Cohort / Pod' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="results-card" *ngIf="cohortResult">
+      <div class="result-summary">
+        <div class="rs-item green"><mat-icon>person_add</mat-icon><span>{{ cohortResult.createdCount }} students created</span></div>
+        <div class="rs-item teal" *ngIf="cohortResult.updatedCount"><mat-icon>update</mat-icon><span>{{ cohortResult.updatedCount }} updated</span></div>
+        <div class="rs-item red" *ngIf="cohortResult.errorCount"><mat-icon>error</mat-icon><span>{{ cohortResult.errorCount }} errors</span></div>
+      </div>
+      <div class="error-list" *ngIf="cohortResult.errors?.length">
+        <div class="err-row" *ngFor="let e of cohortResult.errors"><mat-icon>warning</mat-icon>{{ e }}</div>
+      </div>
+      <div class="student-grid" *ngIf="cohortResult.created?.length">
+        <div class="student-chip" *ngFor="let s of cohortResult.created">
+          <div class="sc-av">{{ s.fullName[0] }}</div>
+          <div>
+            <div class="sc-name">{{ s.fullName }}</div>
+            <div class="sc-meta">{{ s.podName || '—' }} · {{ s.cohortName || '—' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

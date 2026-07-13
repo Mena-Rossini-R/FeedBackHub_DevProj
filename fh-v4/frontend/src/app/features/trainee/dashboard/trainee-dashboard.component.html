@@ -1,0 +1,92 @@
+<!-- trainee-dashboard.component.html -->
+<div class="page-wrapper">
+  <div class="page-header">
+    <div><h2>My Dashboard</h2><p>Your progress overview, trend chart and upcoming alerts</p></div>
+  </div>
+
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+
+  <ng-container *ngIf="!loading && stats">
+
+    <!-- KPI Cards -->
+    <div class="kpi-row">
+      <mat-card class="kpi-card" *ngFor="let k of [
+        {label:'Overall Progress',  value: (stats.overallProgress||0)+'%', color:'#2A70B2', icon:'trending_up'},
+        {label:'Assignments Done',  value: (stats.assignmentsDone||0)+'/'+( stats.totalAssignments||0), color:'#1A8240', icon:'assignment_turned_in'},
+        {label:'Pending Feedback',  value: stats.pendingFeedback,  color:'#BE780E', icon:'hourglass_empty'},
+        {label:'Skill Alerts',      value: alertCount,              color:'#C22626', icon:'notifications'}
+      ]">
+        <div class="kpi-stripe" [style.background]="k.color"></div>
+        <div class="kpi-body">
+          <div class="kpi-label">{{ k.label }}</div>
+          <div class="kpi-value" [style.color]="k.color">{{ k.value }}</div>
+        </div>
+        <mat-icon class="kpi-bg-icon">{{ k.icon }}</mat-icon>
+      </mat-card>
+    </div>
+
+    <!-- Progress ring + trend chart -->
+    <div class="content-row">
+
+      <!-- Trend Chart -->
+      <mat-card class="trend-card">
+        <mat-card-header><mat-card-title><mat-icon>trending_up</mat-icon> Performance Trend</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <div class="empty-state" *ngIf="!weeklyEntries.length"><mat-icon>bar_chart</mat-icon><p>No scores yet</p></div>
+          <div class="bar-chart" *ngIf="weeklyEntries.length">
+            <div class="chart-area">
+              <div class="bar-col" *ngFor="let e of weeklyEntries">
+                <div class="bar-tooltip">{{ e.score }}%</div>
+                <div class="bar" [style.height.px]="getBarHeight(e.score)"
+                     [style.background]="getBarColor(e.score)"></div>
+                <div class="bar-label">{{ e.week }}</div>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Overall progress ring -->
+      <mat-card class="progress-card">
+        <mat-card-header><mat-card-title><mat-icon>donut_large</mat-icon> Overall Progress</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <div class="ring-container">
+            <div class="ring">
+              <svg viewBox="0 0 120 120" width="160" height="160">
+                <circle cx="60" cy="60" r="52" fill="none" stroke="#E9F1FE" stroke-width="12"/>
+                <circle cx="60" cy="60" r="52" fill="none" stroke="#2A70B2" stroke-width="12"
+                  [attr.stroke-dasharray]="(progressPercent/100)*326.7 + ' 326.7'"
+                  stroke-linecap="round" transform="rotate(-90 60 60)"/>
+              </svg>
+              <div class="ring-label">
+                <span class="ring-value">{{ progressPercent | number:'1.0-0' }}%</span>
+                <span class="ring-sub">Overall</span>
+              </div>
+            </div>
+          </div>
+          <div class="stats-list">
+            <div class="stat-row"><span>Completed</span><strong class="score-green">{{ stats.assignmentsDone }}</strong></div>
+            <div class="stat-row"><span>Total</span><strong>{{ stats.totalAssignments }}</strong></div>
+            <div class="stat-row"><span>Pending Feedback</span><strong class="score-amber">{{ stats.pendingFeedback }}</strong></div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <!-- Recent activity — only trainer actions for this trainee -->
+    <mat-card class="activity-card" *ngIf="stats.recentActivity?.length">
+      <mat-card-header><mat-card-title><mat-icon>history</mat-icon> Recent Activity</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <div class="activity-item" *ngFor="let a of stats.recentActivity">
+          <div class="act-dot"><mat-icon>{{ getActivityIcon(a.activityType) }}</mat-icon></div>
+          <div>
+            <div class="act-desc">{{ a.description }}</div>
+            <div class="act-meta">{{ a.performedBy }} · {{ a.createdAt | date:'short' }}</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </ng-container>
+</div>

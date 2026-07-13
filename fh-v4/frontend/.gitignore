@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+/dist
+/tmp
+/out-tsc
+/bazel-out
+/.angular/cache/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+eslintdebug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# IDEs and Editors
+.idea/
+.project
+.classpath
+.cproject
+.settings/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Local environment files (contains sensitive API keys/secrets)
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+/.angular/cache/

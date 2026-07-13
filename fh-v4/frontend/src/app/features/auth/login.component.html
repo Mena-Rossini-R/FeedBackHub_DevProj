@@ -1,0 +1,41 @@
+<!-- features/auth/login.component.html -->
+<div class="login-bg">
+  <div class="login-card mat-elevation-z8">
+    <div class="brand">
+      <div class="brand-icon">FH</div>
+      <h1>Feedback Hub</h1>
+      <p>Structured Feedback Platform for Training Programs</p>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email">
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error>Valid email required</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Password</mat-label>
+        <input matInput formControlName="password" [type]="hide ? 'password' : 'text'">
+        <button mat-icon-button matSuffix type="button" (click)="hide=!hide">
+          <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error>Password required</mat-error>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" class="login-btn" [disabled]="loading">
+        <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+        <mat-icon *ngIf="!loading">login</mat-icon>
+        {{ loading ? 'Signing in...' : 'Sign In' }}
+      </button>
+     </form>
+     <mat-divider style="margin:20px 0"></mat-divider>
+     <div class="demo-section">
+      <p class="demo-label">QUICK DEMO ACCESS</p>
+      <div class="demo-btns">
+        <button mat-stroked-button *ngFor="let acc of demoAccounts"
+                [style.borderColor]="acc.color" [style.color]="acc.color"
+                (click)="fill(acc)">{{ acc.label }}</button>
+      </div>
+      <p class="demo-hint">Click a role to pre-fill, then Sign In</p>
+    </div>
+  </div>
+</div>

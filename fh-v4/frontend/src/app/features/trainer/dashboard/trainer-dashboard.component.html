@@ -1,0 +1,86 @@
+<!-- trainer-dashboard.component.html -->
+<div class="page-wrapper">
+  <div class="page-header">
+    <div><h2>Trainer Dashboard</h2><p>Performance overview, class health, and at-risk students</p></div>
+    <button mat-raised-button color="primary" (click)="load()"><mat-icon>refresh</mat-icon> Refresh</button>
+  </div>
+
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+
+  <ng-container *ngIf="!loading && stats">
+
+    <!-- KPI Cards -->
+    <div class="kpi-row">
+      <mat-card class="kpi-card" *ngFor="let k of [
+        {label:'Total Students',   value: stats.totalStudents,   color:'#2A70B2', icon:'people'},
+        {label:'Average Score',    value: (stats.avgScore || 0) + '%', color:'#1A8240', icon:'trending_up'},
+        {label:'Below Threshold',  value: stats.belowThreshold,  color:'#C22626', icon:'warning'},
+        {label:'Active Pods',      value: stats.activePods,      color:'#6838A8', icon:'group_work'}
+      ]">
+        <div class="kpi-stripe" [style.background]="k.color"></div>
+        <div class="kpi-body">
+          <div class="kpi-label">{{ k.label }}</div>
+          <div class="kpi-value" [style.color]="k.color">{{ k.value }}</div>
+        </div>
+        <mat-icon class="kpi-bg-icon">{{ k.icon }}</mat-icon>
+      </mat-card>
+    </div>
+
+    <div class="content-row">
+
+      <!-- Pod Performance Chart -->
+      <mat-card class="chart-card">
+        <mat-card-header><mat-card-title><mat-icon>bar_chart</mat-icon> Class Performance by Pod</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <div class="pod-bars" *ngIf="getPodEntries().length">
+            <div class="pod-bar-item" *ngFor="let p of getPodEntries()">
+              <div class="pod-label">{{ p.pod }}</div>
+              <div class="bar-track">
+                <div class="bar-fill"
+                     [style.width.%]="p.avg"
+                     [style.background]="p.avg >= 75 ? '#1A8240' : p.avg >= 65 ? '#BE780E' : '#C22626'">
+                </div>
+              </div>
+              <div class="pod-score" [ngClass]="getScoreClass(p.avg)">{{ p.avg | number:'1.0-0' }}%</div>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="!getPodEntries().length">
+            <mat-icon>bar_chart</mat-icon><p>No pod data yet</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- At-Risk Students -->
+      <mat-card class="risk-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>warning</mat-icon> At-Risk Students
+            <span class="count-badge" *ngIf="stats.atRiskStudents?.length">{{ stats.atRiskStudents?.length }}</span>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngFor="let s of stats.atRiskStudents">
+            <div class="risk-row">
+              <span class="risk-name">{{ s.fullName }}</span>
+              <span class="risk-pod">{{ s.podName }}</span>
+              <span class="risk-score score-red">{{ s.latestScore | number:'1.0-0' }}%</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <!-- Activity Feed -->
+    <mat-card class="activity-card" *ngIf="stats.recentActivity?.length">
+      <mat-card-header><mat-card-title><mat-icon>history</mat-icon> Recent Activity</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <div class="activity-item" *ngFor="let a of stats.recentActivity">
+          <div class="act-dot"><mat-icon>{{ getActivityIcon(a.activityType) }}</mat-icon></div>
+          <div><div class="act-desc">{{ a.description }}</div><div class="act-meta">{{ a.performedBy }} · {{ a.createdAt | date:'short' }}</div></div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </ng-container>
+</div>

@@ -1,0 +1,82 @@
+<!-- feedback-thread.component.html -->
+<div class="tf-wrapper">
+  <div class="tf-header">
+    <h2>Feedback Thread</h2>
+    <p>Two-way conversation with your trainer</p>
+  </div>
+
+  <div class="tf-body">
+
+    <!-- TOP: Assignment tabs -->
+    <div class="assignment-tabs">
+      <div *ngIf="!scores.length" class="tabs-empty">No assignments yet</div>
+      <button class="asgn-tab"
+              *ngFor="let s of scores"
+              [class.active]="selectedScoreId === s.id"
+              (click)="selectScore(s.id)">
+        <span class="asgn-tab-name">{{ s.assignmentName }}</span>
+        <span class="asgn-tab-score">{{ s.score }}%</span>
+        <span class="tab-dot" *ngIf="hasUnread(s.id)"></span>
+      </button>
+    </div>
+
+    <!-- BOTTOM: Chat area -->
+    <div class="chat-area">
+
+      <div *ngIf="!selectedScore" class="empty-state centered">
+        <mat-icon>touch_app</mat-icon>
+        <p>Select an assignment above to view feedback</p>
+      </div>
+
+      <ng-container *ngIf="selectedScore">
+        <!-- Chat header -->
+        <div class="chat-header">
+          <div class="ch-icon"><mat-icon>assignment</mat-icon></div>
+          <div>
+            <div class="ch-name">{{ selectedScore.assignmentName }}</div>
+            <div class="ch-sub">Score: {{ selectedScore.score }}% · {{ selectedScore.submittedDate | date:'mediumDate' }}</div>
+          </div>
+          <span class="status-chip" [class.pending]="selectedScore.feedbackStatus === 'PENDING'">
+            {{ selectedScore.feedbackStatus }}
+          </span>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages">
+          <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+          <ng-container *ngIf="!loading">
+            <div class="empty-state" *ngIf="!messages.length">
+              <mat-icon>chat_bubble_outline</mat-icon>
+              <p>No messages yet — your trainer hasn't sent feedback yet</p>
+            </div>
+            <div class="message"
+                 *ngFor="let m of messages"
+                 [class.trainer-msg]="isTrainer(m.senderRole)"
+                 [class.trainee-msg]="!isTrainer(m.senderRole)">
+              <div class="msg-meta">
+                <span class="msg-sender">{{ m.senderName }}</span>
+                <span class="new-chip" *ngIf="isTrainer(m.senderRole) && !m.readByTrainee">NEW</span>
+                <span class="msg-time">{{ m.createdAt | date:'short' }}</span>
+              </div>
+              <div class="msg-bubble">{{ m.message }}</div>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Reply bar -->
+        <div class="reply-bar">
+          <mat-form-field appearance="outline" style="flex:1">
+            <mat-label>Reply to your trainer...</mat-label>
+            <textarea matInput [formControl]="messageCtrl" rows="2" (keydown.control.enter)="send()"></textarea>
+          </mat-form-field>
+          <button mat-raised-button color="primary" (click)="send()" [disabled]="sending || messageCtrl.invalid">
+            <mat-spinner diameter="16" *ngIf="sending"></mat-spinner>
+            <mat-icon *ngIf="!sending">send</mat-icon>
+            Send
+          </button>
+        </div>
+      </ng-container>
+    </div>
+
+  </div>
+</div>

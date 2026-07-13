@@ -1,0 +1,125 @@
+<!-- cohort-info.component.html -->
+<div class="page-wrapper">
+  <div class="page-header">
+    <div><h2>My Cohort & Pod</h2><p>Personal details and pod performance comparison</p></div>
+  </div>
+
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+
+  <ng-container *ngIf="!loading && currentUser">
+
+    <!-- ── Personal Details Row ─────────────────────────────────────── -->
+    <div class="info-row">
+      <!-- Cohort card -->
+      <mat-card class="info-card">
+        <div class="info-header cohort">
+          <mat-icon>school</mat-icon>
+          <div>
+            <div class="info-title">{{ currentUser.cohortName || '—' }}</div>
+            <div class="info-sub">Your cohort programme</div>
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+        <div class="info-stats">
+          <div class="info-stat">
+            <div class="stat-val" [ngClass]="getScoreClass(myAvg)">{{ myAvg }}%</div>
+            <div class="stat-lbl">Your Avg Score</div>
+          </div>
+          <div class="info-stat">
+            <div class="stat-val">{{ ownScores.length }}</div>
+            <div class="stat-lbl">Assessments</div>
+          </div>
+          <div class="info-stat">
+            <div class="stat-val">{{ podMembers.length }}</div>
+            <div class="stat-lbl">Pod Size</div>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Pod card -->
+      <mat-card class="info-card">
+        <div class="info-header pod">
+          <mat-icon>group_work</mat-icon>
+          <div>
+            <div class="info-title">{{ currentUser.podName || '—' }}</div>
+            <div class="info-sub">Your assigned pod group</div>
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+        <div class="pod-details">
+          <div class="pod-detail-row"><span>Full Name</span><strong>{{ currentUser.fullName }}</strong></div>
+          <div class="pod-detail-row"><span>Email</span><strong style="color:#2A70B2">{{ currentUser.email }}</strong></div>
+          <div class="pod-detail-row"><span>Pod</span><strong>{{ currentUser.podName || '—' }}</strong></div>
+          <div class="pod-detail-row"><span>Cohort</span><strong>{{ currentUser.cohortName || '—' }}</strong></div>
+          <div class="pod-detail-row"><span>Pod Rank</span>
+            <strong [ngClass]="getScoreClass(myEntry?.avgScore ?? 0)">
+              {{ getMedalIcon(myRank) || ('#' + myRank) }} of {{ podMembers.length }}
+            </strong>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- ── Pod Leaderboard ──────────────────────────────────────────── -->
+    <mat-card class="leaderboard-card">
+      <mat-card-header>
+        <mat-card-title><mat-icon>leaderboard</mat-icon> Pod Performance — {{ currentUser.podName }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+
+        <!-- Summary chips -->
+        <div class="perf-chips">
+          <div class="perf-chip">
+            <span class="chip-lbl">My Avg</span>
+            <span class="chip-val" [ngClass]="getScoreClass(myEntry?.avgScore ?? 0)">{{ myEntry?.avgScore ?? 0 }}%</span>
+          </div>
+          <div class="perf-chip">
+            <span class="chip-lbl">Pod Avg</span>
+            <span class="chip-val" [ngClass]="getScoreClass(podAvg)">{{ podAvg }}%</span>
+          </div>
+          <div class="perf-chip">
+            <span class="chip-lbl">My Rank</span>
+            <span class="chip-val rank-val">{{ getMedalIcon(myRank) || ('#' + myRank) }}</span>
+          </div>
+          <div class="perf-chip">
+            <span class="chip-lbl">Members</span>
+            <span class="chip-val">{{ podMembers.length }}</span>
+          </div>
+        </div>
+
+        <mat-divider style="margin:12px 0 16px"></mat-divider>
+
+        <!-- Solo-pod message -->
+        <div class="solo-state" *ngIf="podMembers.length === 1">
+          <mat-icon>person</mat-icon>
+          <p>You're the only member in this pod right now.<br>Leaderboard will appear once more trainees join.</p>
+        </div>
+
+        <!-- Leaderboard rows -->
+        <div class="member-list" *ngIf="podMembers.length > 1">
+          <div class="member-row" *ngFor="let m of podMembers; let i = index"
+               [class.is-me]="m.isCurrentUser">
+            <div class="rank-col">
+              <span class="medal" *ngIf="i < 3">{{ getMedalIcon(i+1) }}</span>
+              <span class="rank-num" *ngIf="i >= 3">#{{ i+1 }}</span>
+            </div>
+            <div class="name-col">
+              <span class="m-name">{{ m.traineeName }}</span>
+              <span class="you-badge" *ngIf="m.isCurrentUser">You</span>
+            </div>
+            <div class="bar-col">
+              <div class="bar-bg">
+                <div class="bar-fill" [ngClass]="getScoreClass(m.avgScore)"
+                     [style.width]="getBarWidth(m.avgScore)"></div>
+              </div>
+            </div>
+            <div class="score-col" [ngClass]="getScoreClass(m.avgScore)">{{ m.avgScore }}%</div>
+            <div class="count-col">{{ m.scoreCount }} tests</div>
+          </div>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+  </ng-container>
+</div>

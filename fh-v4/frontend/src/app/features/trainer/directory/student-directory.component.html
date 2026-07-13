@@ -1,0 +1,100 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div><h2>Student Directory</h2><p>All student scores</p></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input [(ngModel)]="searchTerm" placeholder="Search by name or email..." (ngModelChange)="applyFilter()">
+    </div>
+    <select id="podFilter" class="filter-select" [(ngModel)]="podFilter" (change)="applyFilter()">
+      <option value="">All Pods</option>
+      <option *ngFor="let p of pods" [value]="p">{{ p }}</option>
+    </select>
+    <button mat-stroked-button (click)="load()"><mat-icon>refresh</mat-icon></button>
+  </div>
+
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+
+  <div class="dir-layout" *ngIf="!loading">
+    <!-- Table -->
+    <div class="table-panel">
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort class="full-table">
+
+          <ng-container matColumnDef="traineeName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Student</th>
+            <td mat-cell *matCellDef="let r">
+              <div class="name-cell">
+                <div class="av-circle" [style.background]="getScoreColor(r.score)">{{ r.traineeName[0] }}</div>
+                <div>
+                  <div class="td-name">{{ r.traineeName }}</div>
+                  <div class="td-pod">{{ r.podName }}</div>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="traineeEmail">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+            <td mat-cell *matCellDef="let r" class="td-meta">{{ r.traineeEmail }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="podName">
+            <th mat-header-cell *matHeaderCellDef>Pod</th>
+            <td mat-cell *matCellDef="let r">
+              <span class="pod-chip">{{ r.podName || '—' }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="assignmentName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Assignment</th>
+            <td mat-cell *matCellDef="let r"><strong>{{ r.assignmentName }}</strong></td>
+          </ng-container>
+
+          <ng-container matColumnDef="score">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Score</th>
+            <td mat-cell *matCellDef="let r">
+              <span [ngClass]="getScoreClass(r.score)" class="score-val">{{ r.score }}%</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="grade">
+            <th mat-header-cell *matHeaderCellDef>Grade</th>
+            <td mat-cell *matCellDef="let r" class="td-meta">{{ r.grade || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="trend">
+            <th mat-header-cell *matHeaderCellDef>Trend</th>
+            <td mat-cell *matCellDef="let r">
+              <mat-icon [ngClass]="getTrendClass(r.trend)">{{ getTrendIcon(r.trend) }}</mat-icon>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="feedbackStatus">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let r">
+              <span class="status-chip"
+                    [class.pending]="r.feedbackStatus==='PENDING'"
+                    [class.viewed]="r.feedbackStatus==='VIEWED'">
+                {{ r.feedbackStatus }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let r"></td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky:true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"
+              class="table-row"></tr>
+        </table>
+      </div>
+      <mat-paginator [pageSizeOptions]="[10,25,50]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+</div>
